@@ -115,12 +115,15 @@ class Simulator:
             exit()
 
     def update_status(self):
-        progress = np.linalg.norm(self.car.state[0:2] - self.rt.centerline[0, 0:2], 2)
+        car_pos = self.car.state[0:2]
 
-        if progress > 10.0 and not self.lap_started:
+        dists = np.linalg.norm(self.rt.centerline[:, :2] - car_pos, axis=1)
+        closest_idx = np.argmin(dists)
+
+        if closest_idx > 20 and not self.lap_started:
             self.lap_started = True
-    
-        if progress <= 1.0 and self.lap_started and not self.lap_finished:
+
+        if closest_idx < 5 and self.lap_started and not self.lap_finished:
             self.lap_finished = True
             self.lap_time_elapsed = time() - self.lap_start_time
 
@@ -128,7 +131,7 @@ class Simulator:
             self.lap_time_elapsed = time() - self.lap_start_time
 
     def start(self):
-        # Run the simulation loop every 1 millisecond.
+        # Run the simulation loop every 1 second.
         self.timer = self.figure.canvas.new_timer(interval=1)
         self.timer.add_callback(self.run)
         self.lap_start_time = time()
