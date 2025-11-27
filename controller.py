@@ -4,7 +4,7 @@ from numpy.typing import ArrayLike
 from simulator import RaceTrack
 
 def get_steer_rate(delta_r, delta, min_steer_rate, max_steer_rate) -> float:
-    K_p = 5.0
+    K_p = 10.0
     steer_rate = K_p * (delta_r - delta)
 
     steer_rate = np.clip(steer_rate, min_steer_rate, max_steer_rate)
@@ -12,7 +12,7 @@ def get_steer_rate(delta_r, delta, min_steer_rate, max_steer_rate) -> float:
     return steer_rate
 
 def get_acceleration(v_r, v, min_acceleration, max_acceleration) -> float:
-    K_p = 100.0
+    K_p = 10.0
     acceleration = K_p * (v_r - v)
 
     acceleration = np.clip(acceleration, min_acceleration, max_acceleration)
@@ -56,12 +56,13 @@ def get_next_ind(centerline, ind, lookahead):
     return next_ind
 
 def get_delta_r(s_x, s_y, phi, l_wb, centerline, curr_ind, min_steering_angle, max_steering_angle) -> float:
-    lookahead = 20
+    lookahead = 12
     next_ind = get_next_ind(centerline, curr_ind, lookahead)
     r_x, r_y = centerline[next_ind]
 
     phi_des = np.arctan2(r_y - s_y, r_x - s_x)
     alpha = phi_des - phi
+    alpha = np.arctan2(np.sin(alpha), np.cos(alpha))
 
     delta_r = np.arctan2(2 * l_wb * np.sin(alpha), lookahead)
 
@@ -92,7 +93,7 @@ def get_v_r(racetrack, N, centerline, curr_ind, min_velocity, max_velocity) -> f
 
     curvature = 0.7 * curv_now + 0.3 * curv_future
 
-    v_max = 70.0
+    v_max = 60.0
     k_speed = 3.0
     v_r = v_max * np.exp(-k_speed * curvature)
 
